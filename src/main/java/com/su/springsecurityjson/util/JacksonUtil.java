@@ -21,7 +21,7 @@ import java.util.Map;
 @Slf4j
 public class JacksonUtil {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    public static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * @return java.lang.String

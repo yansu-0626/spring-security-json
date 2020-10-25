@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -21,10 +22,12 @@ import java.util.stream.Collectors;
  * @author Andon
  * @date 2019/12/11
  * <p>
- * JwtToken解析并生成authentication身份信息过滤器
+ * JwtToken解析并生成authentication:身份信息过滤器
  */
 @Slf4j
+@Component
 public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
+
     //token请求头Key
     @Value("${jwt.token-header-key}")
     private String tokenHeaderKey;

@@ -1,9 +1,9 @@
 package com.su.springsecurityjson.config.security.Handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.su.springsecurityjson.config.model.LoginDto;
 import com.su.springsecurityjson.config.model.UrlResponse;
 import com.su.springsecurityjson.service.UserService;
+import com.su.springsecurityjson.util.JacksonUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,8 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 
 /**
  * @ClassName JsonLoginSuccessHandler
- * @Description 自定义登陆成功后处理
+ * @Description 自定义登陆成功后处理200
  * @Author yansu
  * @Date 2020/10/25 下午 3:06
  * @Version 1.0
  **/
+@Component
 public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private ObjectMapper objectMapper;
     //token响应头Key
     @Value("${jwt.token-header-key}")
     private String tokenHeaderKey;
@@ -44,17 +44,12 @@ public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
     //token过期时间
     @Value("${jwt.token-expiration}")
     private Long tokenExpiration;
+
     @Autowired
     private UserService userService;
 
-    public JsonLoginSuccessHandler(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
-
-        httpServletResponse.setCharacterEncoding("UTF-8");
+    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException {
         UrlResponse response = new UrlResponse();
         response.setSuccess(true);
         response.setCode("200");
@@ -81,6 +76,7 @@ public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
         response.setData(userInfo);
         httpServletResponse.setCharacterEncoding("UTF-8");
         httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        httpServletResponse.getWriter().write(objectMapper.writeValueAsString(response));
+        httpServletResponse.getWriter().write(JacksonUtil.objectMapper.writeValueAsString(response));
     }
+
 }
