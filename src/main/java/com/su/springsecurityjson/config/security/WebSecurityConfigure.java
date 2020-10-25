@@ -1,11 +1,13 @@
 package com.su.springsecurityjson.config.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.su.springsecurityjson.config.security.Handler.*;
 import com.su.springsecurityjson.config.security.service.UserDetailsServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.annotation.Resource;
 
 /**
  * @ClassName WebSecurityConfigure
@@ -26,9 +30,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private UserDetailsServiceImp userDetailsServiceImp;
+    @Resource
+    private JwtAuthorizationTokenFilter jwtAuthorizationTokenFilter;
+    @Resource
+    private UrlLogoutSuccessHandler urlLogoutSuccessHandler;
+    @Resource
+    private JsonLoginSuccessHandler jsonLoginSuccessHandler;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -37,49 +45,68 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // 对请求进行认证
         http.authorizeRequests()
-                // 公共资源无需权限
+                // 配置公共资源无需权限
                 .antMatchers("/public/**").permitAll()
+                // /login 的POST请求 放行
+                .antMatchers(HttpMethod.POST, "/login").permitAll()
+                // OPTIONS 方便前后端分离的时候前端过来的第一次验证请求
+                .antMatchers(HttpMethod.OPTIONS, "/**").anonymous()
+                // 其他请求权限验证
                 .anyRequest().authenticated()
+                // 关闭掉csrf保护
                 .and().csrf().disable()
+                //开启跨域访问
+                .cors().disable()
+                // 在**过滤器之前添加自定义登录过滤器
                 .addFilterAfter(jsonAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthorizationTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                // 在**过滤器之前添加验证身份信息过滤器
+                .addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
-                .authenticationEntryPoint(new JsonAuthenticationEntryPoint(this.objectMapper))
-                .accessDeniedHandler(new JsonAccessDeniedHandler(this.objectMapper));
+                // 自定义未登录后处理
+                .authenticationEntryPoint(new JsonAuthenticationEntryPoint())
+                // 自定义权限校验失败\权限不足后处理
+                .accessDeniedHandler(new JsonAccessDeniedHandler());
         // 将session策略设置为无状态的,通过token进行登录认证
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // 开启自动配置的注销功能
         http.logout()
                 //自定义注销请求路径
                 .logoutUrl("/logout")
-                .logoutSuccessHandler(urlLogoutSuccessHandler());
+                .logoutSuccessHandler(urlLogoutSuccessHandler);
     }
 
+    /**
+     * @return org.springframework.security.access.hierarchicalroles.RoleHierarchy
+     * @Author yansu
+     * @Description 设置角色包含关系
+     * @Date 下午 9:29 2020/10/25
+     * @Param []
+     **/
     @Bean
-    public UrlLogoutSuccessHandler urlLogoutSuccessHandler() {
-        UrlLogoutSuccessHandler jwtAuthorizationTokenFilter = new UrlLogoutSuccessHandler(this.objectMapper);
-        return jwtAuthorizationTokenFilter;
+    public RoleHierarchy roleHierarchy() {
+        String separator = System.lineSeparator();
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        String hierarchy = "ROLE_ADMIN > ROLE_USER " + separator + " ROLE_USER > ROLE_TOURISTS";
+        roleHierarchy.setHierarchy(hierarchy);
+        return roleHierarchy;
     }
 
-    @Bean
-    public JwtAuthorizationTokenFilter jwtAuthorizationTokenFilter() {
-        JwtAuthorizationTokenFilter jwtAuthorizationTokenFilter = new JwtAuthorizationTokenFilter();
-        return jwtAuthorizationTokenFilter;
-    }
-
+    /**
+     * @return com.su.springsecurityjson.config.security.JsonAuthenticationFilter
+     * @Author yansu
+     * @Description 创建自定义登录过滤器对象并交IOC容器管理
+     * @Date 下午 9:14 2020/10/25
+     * @Param []
+     **/
     @Bean
     public JsonAuthenticationFilter jsonAuthenticationFilter() throws Exception {
         JsonAuthenticationFilter filter = new JsonAuthenticationFilter("/login", "POST");
         filter.setAuthenticationManager(authenticationManager());
-        filter.setObjectMapper(this.objectMapper);
-        filter.setAuthenticationSuccessHandler(jsonLoginSuccessHandler());
-        filter.setAuthenticationFailureHandler(new JsonLoginFailureHandler(this.objectMapper));
+        filter.setAuthenticationSuccessHandler(jsonLoginSuccessHandler);
+        filter.setAuthenticationFailureHandler(new JsonLoginFailureHandler());
         return filter;
     }
 
-    @Bean
-    public JsonLoginSuccessHandler jsonLoginSuccessHandler() {
-        return new JsonLoginSuccessHandler(this.objectMapper);
-    }
 }
