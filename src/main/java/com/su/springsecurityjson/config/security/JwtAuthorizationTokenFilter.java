@@ -1,7 +1,9 @@
 package com.su.springsecurityjson.config.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,8 +58,16 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
         try {
             // 解析token
             claims = Jwts.parser().setSigningKey(tokenSecret).parseClaimsJws(token.replace(tokenPrefix + " ", "")).getBody();
+        } catch (ExpiredJwtException e) {
+            log.error("JwtToken validity!! 令牌{}过期;error={}", token, e.getMessage());
+            chain.doFilter(request, response);
+            return;
+        } catch (SignatureException e) {
+            log.error("JwtToken validity!! 令牌{}被篡改;error={}", token, e.getMessage());
+            chain.doFilter(request, response);
+            return;
         } catch (Exception e) {
-            log.error("JwtToken validity!! error={}", e.getMessage());
+            log.error("JwtToken validity!! 令牌{};error={}", token, e.getMessage());
             chain.doFilter(request, response);
             return;
         }

@@ -1,7 +1,8 @@
 package com.su.springsecurityjson.config.security;
 
 import com.su.springsecurityjson.config.security.Handler.*;
-import com.su.springsecurityjson.config.security.service.UserDetailsServiceImp;
+import com.su.springsecurityjson.config.security.service.MyAuthenticationProvider;
+import com.su.springsecurityjson.config.security.service.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.annotation.Resource;
@@ -30,17 +30,21 @@ import javax.annotation.Resource;
 public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private UserDetailsServiceImp userDetailsServiceImp;
+    private MyUserDetailsService myUserDetailsService;
     @Resource
     private JwtAuthorizationTokenFilter jwtAuthorizationTokenFilter;
     @Resource
     private UrlLogoutSuccessHandler urlLogoutSuccessHandler;
     @Resource
     private JsonLoginSuccessHandler jsonLoginSuccessHandler;
+    @Resource
+    private MyAuthenticationProvider myAuthenticationProvider;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsServiceImp).passwordEncoder(new BCryptPasswordEncoder());
+//        auth.userDetailsService(myUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+        //自定义登录认证
+        auth.authenticationProvider(myAuthenticationProvider);
     }
 
     @Override

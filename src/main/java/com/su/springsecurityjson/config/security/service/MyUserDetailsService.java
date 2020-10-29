@@ -24,7 +24,7 @@ import java.util.Set;
  **/
 @AllArgsConstructor
 @Service
-public class UserDetailsServiceImp implements UserDetailsService {
+public class MyUserDetailsService implements UserDetailsService {
 
     @Resource
     private UserService userService;
