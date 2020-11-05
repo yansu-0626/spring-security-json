@@ -1,5 +1,6 @@
 package com.su.springsecurityjson.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/public")
 @RestController
 public class PublicController {
-
+    @PreAuthorize("hasAuthority('user')")
     @RequestMapping(value = "/hello")
     public String hello() {
         return "hello";

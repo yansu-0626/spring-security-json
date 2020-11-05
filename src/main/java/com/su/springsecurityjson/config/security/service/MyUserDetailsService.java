@@ -17,7 +17,7 @@ import java.util.Set;
 
 /**
  * @ClassName UserService
- * @Description TODO
+ * @Description 处理用户登录详情信息
  * @Author yansu
  * @Date 2020/10/25 下午 3:17
  * @Version 1.0
@@ -49,6 +49,7 @@ public class MyUserDetailsService implements UserDetailsService {
         List<String> roles = userService.findRoleNameByUsername(username);
         for (String roleName : roles) {
             //用户拥有的角色
+//            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_" + roleName);
             SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(roleName);
             authoritiesSet.add(simpleGrantedAuthority);
         }

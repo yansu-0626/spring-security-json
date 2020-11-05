@@ -73,6 +73,7 @@ public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
         //设置token响应头
         httpServletResponse.addHeader(tokenHeaderKey, tokenPrefix + " " + token);
         userInfo.put(tokenHeaderKey, tokenPrefix + " " + token);
+        userInfo.put("roleList", authentication.getAuthorities());
         response.setData(userInfo);
         httpServletResponse.setCharacterEncoding("UTF-8");
         httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
