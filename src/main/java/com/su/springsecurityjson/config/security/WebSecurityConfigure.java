@@ -1,7 +1,8 @@
 package com.su.springsecurityjson.config.security;
 
 import com.su.springsecurityjson.config.security.Handler.*;
-import com.su.springsecurityjson.config.security.service.UserDetailsServiceImp;
+import com.su.springsecurityjson.config.security.service.MyAuthenticationProvider;
+import com.su.springsecurityjson.config.security.service.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.annotation.Resource;
@@ -29,18 +29,20 @@ import javax.annotation.Resource;
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserDetailsServiceImp userDetailsServiceImp;
     @Resource
     private JwtAuthorizationTokenFilter jwtAuthorizationTokenFilter;
     @Resource
     private UrlLogoutSuccessHandler urlLogoutSuccessHandler;
     @Resource
     private JsonLoginSuccessHandler jsonLoginSuccessHandler;
+    @Resource
+    private MyAuthenticationProvider myAuthenticationProvider;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsServiceImp).passwordEncoder(new BCryptPasswordEncoder());
+//        auth.userDetailsService(myUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+        //自定义登录认证
+        auth.authenticationProvider(myAuthenticationProvider);
     }
 
     @Override
@@ -50,7 +52,11 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
                 // 配置公共资源无需权限
                 .antMatchers("/public/**").permitAll()
                 // /login 的POST请求 放行
-                .antMatchers(HttpMethod.POST, "/login").permitAll()
+//                .antMatchers(HttpMethod.POST, "/login").permitAll()
+
+                // 此方式设置需后台数据库中的角色名为"ROLE_"开头或登录认证存权限时代码写死 （ SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_" + roleName);）
+//                .antMatchers("/security-manage/user-manage/findAll1").hasRole("user")
+                .antMatchers("/security-manage/user-manage/findAll1").hasAuthority("user")
                 // OPTIONS 方便前后端分离的时候前端过来的第一次验证请求
                 .antMatchers(HttpMethod.OPTIONS, "/**").anonymous()
                 // 其他请求权限验证
