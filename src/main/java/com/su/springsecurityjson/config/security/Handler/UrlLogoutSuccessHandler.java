@@ -14,11 +14,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * @author Andon
- * @date 2019/3/20
- * <p>
- * 自定义注销成功处理器：返回状态码200
- */
+ * @Author yansu
+ * @Description 自定义注销成功处理器：返回状态码200
+ * @Date 下午 10:52 2020/11/8
+ * @Param
+ * @return
+ **/
 @Component
 public class UrlLogoutSuccessHandler implements LogoutSuccessHandler {
 

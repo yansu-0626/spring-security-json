@@ -17,11 +17,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Andon
- * @date 2019/3/20
- * <p>
- * * 动态获取url权限配置
- */
+ * @Author yansu
+ * @Description 从数据库动态取出权限数据源(本次url可被什么role访问)
+ * @Date 下午 10:49 2020/11/8
+ * @Param
+ * @return
+ **/
 @Slf4j
 @Component
 public class MyFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {

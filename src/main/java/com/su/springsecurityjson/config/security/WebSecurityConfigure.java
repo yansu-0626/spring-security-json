@@ -55,17 +55,19 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // 对请求进行认证
         http.authorizeRequests()
-                // 配置公共资源无需权限
-                .antMatchers("/public/**").permitAll()
-                // /login 的POST请求 放行
+                // 配置公共资源无需权限--配置自定义权限验证后注释掉
+//                .antMatchers("/public/**").permitAll()
+                // /login 的POST请求 放行--配置自定义权限验证后注释掉
 //                .antMatchers(HttpMethod.POST, "/login").permitAll()
                 // 此方式设置需后台数据库中的角色名为"ROLE_"开头或登录认证存权限时代码写死 （ SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_" + roleName);）
 //                .antMatchers("/security-manage/user-manage/findAll1").hasRole("user")
-                .antMatchers("/security-manage/user-manage/findAll1").hasAuthority("user")
+                //--配置自定义权限验证后注释掉
+//                .antMatchers("/security-manage/user-manage/findAll1").hasAuthority("user")
                 // OPTIONS 方便前后端分离的时候前端过来的第一次验证请求
                 .antMatchers(HttpMethod.OPTIONS, "/**").anonymous()
                 // 其他请求权限验证
                 .anyRequest().authenticated()
+                // 配置自定义权限验证
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
                     @Override
                     public <O extends FilterSecurityInterceptor> O postProcess(O o) {

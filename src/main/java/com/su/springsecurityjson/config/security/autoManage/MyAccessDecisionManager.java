@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 
 /**
- * @author Andon
- * @date 2019/3/20
- * <p>
- * 自定义权限判断管理器
- */
+ * @Author yansu
+ * @Description 自定义权限判断管理器-->角色权限验证
+ * @Date 下午 10:51 2020/11/8
+ * @Param
+ * @return
+ **/
 @Slf4j
 @Component
 public class MyAccessDecisionManager implements AccessDecisionManager {
