@@ -2,7 +2,6 @@ package com.su.springsecurityjson.config.security.Handler;
 
 import com.su.springsecurityjson.config.model.UrlResponse;
 import com.su.springsecurityjson.util.JacksonUtil;
-import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
