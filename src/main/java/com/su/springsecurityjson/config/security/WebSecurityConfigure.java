@@ -1,19 +1,21 @@
 package com.su.springsecurityjson.config.security;
 
 import com.su.springsecurityjson.config.security.Handler.*;
+import com.su.springsecurityjson.config.security.autoManage.MyAccessDecisionManager;
+import com.su.springsecurityjson.config.security.autoManage.MyFilterInvocationSecurityMetadataSource;
 import com.su.springsecurityjson.config.security.service.MyAuthenticationProvider;
-import com.su.springsecurityjson.config.security.service.MyUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.annotation.Resource;
@@ -37,6 +39,10 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
     private JsonLoginSuccessHandler jsonLoginSuccessHandler;
     @Resource
     private MyAuthenticationProvider myAuthenticationProvider;
+    @Resource
+    private MyFilterInvocationSecurityMetadataSource myFilterInvocationSecurityMetadataSource;
+    @Resource
+    private MyAccessDecisionManager myAccessDecisionManager;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -49,18 +55,29 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // 对请求进行认证
         http.authorizeRequests()
-                // 配置公共资源无需权限
-                .antMatchers("/public/**").permitAll()
-                // /login 的POST请求 放行
+                // 配置公共资源无需权限--配置自定义权限验证后注释掉
+//                .antMatchers("/public/**").permitAll()
+                // /login 的POST请求 放行--配置自定义权限验证后注释掉
 //                .antMatchers(HttpMethod.POST, "/login").permitAll()
-
                 // 此方式设置需后台数据库中的角色名为"ROLE_"开头或登录认证存权限时代码写死 （ SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_" + roleName);）
 //                .antMatchers("/security-manage/user-manage/findAll1").hasRole("user")
-                .antMatchers("/security-manage/user-manage/findAll1").hasAuthority("user")
+                //--配置自定义权限验证后注释掉
+//                .antMatchers("/security-manage/user-manage/findAll1").hasAuthority("user")
                 // OPTIONS 方便前后端分离的时候前端过来的第一次验证请求
                 .antMatchers(HttpMethod.OPTIONS, "/**").anonymous()
                 // 其他请求权限验证
                 .anyRequest().authenticated()
+                // 配置自定义权限验证
+                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+                    @Override
+                    public <O extends FilterSecurityInterceptor> O postProcess(O o) {
+                        // 动态获取url权限配置
+                        o.setSecurityMetadataSource(myFilterInvocationSecurityMetadataSource);
+                        // 权限判断
+                        o.setAccessDecisionManager(myAccessDecisionManager);
+                        return o;
+                    }
+                })
                 // 关闭掉csrf保护
                 .and().csrf().disable()
                 //开启跨域访问

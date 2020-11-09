@@ -21,11 +21,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Andon
- * @date 2019/12/11
- * <p>
- * JwtToken解析并生成authentication:身份信息过滤器
- */
+ * @Author yansu
+ * @Description JwtToken解析并生成authentication:身份信息过滤器
+ * @Date 下午 10:52 2020/11/8
+ * @Param
+ * @return
+ **/
 @Slf4j
 @Component
 public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {

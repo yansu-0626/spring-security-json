@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @ClassName publicController
- * @Description TODO
+ * @Description 测试公共访问权限接口
  * @Author yansu
  * @Date 2020/10/23 下午 4:19
  * @Version 1.0

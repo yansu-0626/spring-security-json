@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 /**
- * @author Andon
- * @date 2019/3/20
- * <p>
- * 用户管理
- */
+ * @Author yansu
+ * @Description 用户管理
+ * @Date 下午 10:53 2020/11/8
+ * @Param
+ * @return
+ **/
 @SuppressWarnings("Duplicates")
 @RestController
 @RequestMapping(value = "/security-manage")
